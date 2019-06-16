@@ -15,3 +15,9 @@ targetOid传1，json返回：
 ```
 {"1":"a","2":"b"}
 ```
+
+测试命令：
+
+```
+curl -X POST http://127.0.0.1:8085/api/snmpwalk --data '{"ip":"172.16.101.1","community":"public","targetOid":"1.3.6.1.2.1.1"}'
+```
