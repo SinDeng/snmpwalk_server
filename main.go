@@ -140,7 +140,7 @@ func main() {
 	default_listen_addr := ip[len(ip)-1]
 	//解析参数
 	flag.BoolVar(&is_reg_consul, "r", false, "注册到Consul")
-	flag.StringVar(&listen_addr, "l", "0.0.0.0:8085", "监听地址，如0.0.0.0:8085")
+	flag.StringVar(&listen_addr, "l", default_listen_addr+":8085", "监听地址，如0.0.0.0:8085")
 	flag.StringVar(&consul_service_addr, "a", default_listen_addr, "Consul注册监听地址，如192.168.1.1，禁止使用0.0.0.0")
 	flag.StringVar(&consul_server_addr, "s", "127.0.0.1:8500", "Consul注册地址，如127.0.0.1:8500")
 	flag.Parse()
