@@ -89,8 +89,8 @@ func registerServer() {
 	}
 
 	registration := new(consulapi.AgentServiceRegistration)
-	registration.ID = fmt.Sprintf("snmpwalk_server_%s", consul_service_addr)
-	registration.Name = "snmpwalk_server"
+	registration.ID = fmt.Sprintf("snmpwalk-server-%s", consul_service_addr)
+	registration.Name = "snmpwalk-server"
 	registration.Port = 8502
 	registration.Address = consul_service_addr
 	registration.Check = &consulapi.AgentServiceCheck{
