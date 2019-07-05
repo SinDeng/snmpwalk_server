@@ -89,12 +89,12 @@ func registerServer() {
 	}
 
 	registration := new(consulapi.AgentServiceRegistration)
-	registration.ID = fmt.Sprintf("snmpwalk-server-%s", consul_service_addr)
-	registration.Name = "snmpwalk-server"
-	registration.Port = 8502
+	registration.ID = fmt.Sprintf("%s-%s", consul_service_name, consul_service_addr)
+	registration.Name = consul_service_name
+	registration.Port = listen_port
 	registration.Address = consul_service_addr
 	registration.Check = &consulapi.AgentServiceCheck{
-		HTTP:                           fmt.Sprintf("http://%s/online_check", listen_addr),
+		HTTP:                           fmt.Sprintf("http://%s:%d/online_check", consul_service_addr, listen_port),
 		Timeout:                        "3s",
 		Interval:                       "5s",
 		DeregisterCriticalServiceAfter: "30s", //check失败后30秒删除本服务
@@ -130,8 +130,10 @@ func GetIntranetIp() []string {
 var (
 	is_reg_consul       bool
 	listen_addr         string
+	listen_port         int
 	consul_service_addr string
 	consul_server_addr  string
+	consul_service_name string
 )
 
 func main() {
@@ -139,16 +141,18 @@ func main() {
 	ip := GetIntranetIp()
 	default_listen_addr := ip[len(ip)-1]
 	//解析参数
-	flag.BoolVar(&is_reg_consul, "r", false, "注册到Consul")
-	flag.StringVar(&listen_addr, "l", default_listen_addr+":8085", "监听地址，如0.0.0.0:8085")
-	flag.StringVar(&consul_service_addr, "a", default_listen_addr, "Consul注册监听地址，如192.168.1.1，禁止使用0.0.0.0")
-	flag.StringVar(&consul_server_addr, "s", "127.0.0.1:8500", "Consul注册地址，如127.0.0.1:8500")
+	flag.StringVar(&listen_addr, "l", "0.0.0.0", "监听地址，如0.0.0.0")
+	flag.IntVar(&listen_port, "p", 8085, "监听端口，如8085")
+	flag.BoolVar(&is_reg_consul, "r", false, "是否注册到Consul")
+	flag.StringVar(&consul_service_addr, "a", default_listen_addr, "Consul注册监听地址，如172.18.0.2，禁止使用0.0.0.0")
+	flag.StringVar(&consul_server_addr, "s", "172.18.0.3:8500", "Consul服务器（注册）地址，如172.18.0.3:8500")
+	flag.StringVar(&consul_service_name, "n", "snmpwalk-server", "Consul服务名称，如snmpwalk-server")
 	flag.Parse()
 	//启动服务
 	http.HandleFunc("/api/snmpwalk", ApiSnmpWalk)
-	fmt.Printf("服务器已启动：%s/api/snmpwalk\n", listen_addr)
+	fmt.Printf("服务器已启动：%s:%d/api/snmpwalk\n", listen_addr, listen_port)
 	if is_reg_consul {
 		go registerServer()
 	}
-	http.ListenAndServe(listen_addr, nil)
+	http.ListenAndServe(fmt.Sprintf("%s:%d", listen_addr, listen_port), nil)
 }
